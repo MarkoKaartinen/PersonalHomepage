@@ -1,0 +1,7 @@
+<?php
+//Pocket settings (create own api key here: http://getpocket.com/api/signup/)
+$pocket_api = ""; //pocket api key
+$pocket_user = ""; //pocket username
+$pocket_pass = ""; //pocket password
+
+?>
