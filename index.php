@@ -3,6 +3,7 @@ if(!file_exists("config.php")){
 	echo "Rename <strong>config.php-sample</strong> to <strong>config.php</strong> and edit settings in config.php!";
 	die();
 }
+include_once("config.php");
 
 $do = $_GET['do'];
 ?>
@@ -61,21 +62,39 @@ $do = $_GET['do'];
 				</ul>
 			</div>
 			<div class="span4">
-				<?php if($pocket_api != "" && $pocket_user != "" && $pocket_pass != ""){ ?>
-					<div class="well" style="padding: 8px 0;">
-						<ul class="nav nav-list">			
-							<li class="nav-header">LUE N&Auml;M&Auml;!!</li>
-							<?php 
-							$roina = file_get_contents("https://readitlaterlist.com/v2/get?apikey=$pocket_api&username=$pocket_user&password=$pocket_pass&state=unread");
-							$roina = json_decode($roina, TRUE);
-							$avaimet = array_keys($roina['list']);
-							for($i = 0; $i < count($avaimet); $i++){
-								echo '<li><a href="'.$roina['list'][$avaimet[$i]]['url'].'" target="_blank"><i class="icon-globe"></i> '.$roina['list'][$avaimet[$i]]['title'].'</a></li>';
-							}
-							?>
-						</ul>
-					</div>
-				<?php } ?>
+				<?php 
+				if($pocket_api != "" && $pocket_user != "" && $pocket_pass != ""){
+					$kirjotafiluun = false;
+					if(file_exists("cache/pocket.html")){
+						$muokattu = filemtime("cache/pocket.html");
+						if((time()-$muokattu) > (60*60)){
+							$kirjotafiluun = true;
+						}else{
+							$kirjotafiluun = false;
+						}
+					}else{
+						$kirjotafiluun = true;
+					}
+					if($kirjotafiluun){
+						$handle = fopen("cache/pocket.html", "w");
+						$pocket = "";
+						$pocket .= '<div class="well" style="padding: 8px 0;">';
+							$pocket .= '<ul class="nav nav-list">			
+								<li class="nav-header">LUE N&Auml;M&Auml;!!</li>';
+								$roina = file_get_contents("https://readitlaterlist.com/v2/get?apikey=$pocket_api&username=$pocket_user&password=$pocket_pass&state=unread");
+								$roina = json_decode($roina, TRUE);
+								$avaimet = array_keys($roina['list']);
+								for($i = 0; $i < count($avaimet); $i++){
+									$pocket .= '<li><a href="'.$roina['list'][$avaimet[$i]]['url'].'" target="_blank"><i class="icon-globe"></i> '.$roina['list'][$avaimet[$i]]['title'].'</a></li>';
+								}
+							$pocket .= "</ul>";
+						$pocket .= "</div>";
+						fwrite($handle, $pocket);
+						fclose($handle);
+					}
+					include_once("cache/pocket.html");
+				}
+				?>
 			</div>
 		</div>
 	</div>
